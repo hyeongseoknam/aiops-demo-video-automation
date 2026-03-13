@@ -1,0 +1,78 @@
+# macOS configuration for AIOps Demo Video Agent
+# Copy to scenario.yaml and update paths for your environment.
+#
+# K6 load generation is managed externally by the user.
+
+trouble:
+  # Update to match your local checkout path
+  base_dir: /Users/${USER}/app/chaos/trouble
+  scenario: "05_downstream_delay"
+  port: 8083
+  params: ["5"]
+
+browser:
+  base_url: "http://localhost:8080"
+  login:
+    url: /account/login
+    email: admin@whatap.io
+    password: admin
+    email_selector: '//*[@id="id_email"]'
+    password_selector: '//*[@id="id_password"]'
+  apm_dashboard:
+    url: /v2/project/apm/1/dashboard
+    wait_sec: 8
+  copilot:
+    url: /aiops/copilot/
+    new_chat_xpath: '//*[@id="root"]/div/div/div[1]/div[1]/button/span'
+    textarea_xpath: '//*[@id="root"]/div/div/div[2]/div[2]/form/textarea'
+  query: "Project Avg Tps 요약해줘"
+  typing_delay_ms: 100
+
+recording:
+  width: 1920
+  height: 1080
+  framerate: 30
+  crf: 18
+
+post_process:
+  output_width: 1920
+  output_height: 1080
+  fps: 30
+  crf: 22
+  # Fonts are auto-detected per OS. Override only if needed:
+  # font_bold: "/System/Library/Fonts/AppleSDGothicNeo.ttc"
+  # font_regular: "/System/Library/Fonts/AppleSDGothicNeo.ttc"
+  intro:
+    text_primary: "AIOps Demo"
+    text_secondary: "LLM 기반 성능 분석 자동화"
+    background_color: "#1a1a2e"
+    duration_sec: 4
+  outro:
+    lines:
+      - "AIOps Demo"
+      - "WhaTap Monitoring + AI Copilot"
+      - "Powered by LLM"
+      - "whatap.io"
+    background_color: "#1a1a2e"
+    duration_sec: 4
+
+scenes:
+  - id: trouble_start
+    caption: "Step 1. 장애 시나리오 주입 (Downstream Delay 5s)"
+  - id: login
+    caption: "Step 2. 모니터링 시스템 로그인"
+  - id: apm_dashboard
+    caption: "Step 3. APM 대시보드 - 장애 영향 확인"
+  - id: navigate_copilot
+    caption: "Step 4. AI Copilot 접근"
+  - id: new_chat
+    caption: "Step 5. 새 대화 시작"
+  - id: type_query
+    caption: "Step 6. 자연어 분석 요청"
+  - id: wait_response
+    caption: "Step 7. AI 분석 결과 스트리밍"
+    post_speed: 2.0
+  - id: show_result
+    caption: "Step 8. 분석 결과 확인"
+  - id: trouble_stop
+    caption: "Step 9. 장애 복구"

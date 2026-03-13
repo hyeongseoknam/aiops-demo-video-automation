@@ -1,0 +1,97 @@
+# K6 load generation is managed externally by the user.
+# Start k6 before running this agent.
+# Mac client → EC2 backend (trouble scripts + web UI on remote host)
+
+trouble:
+  base_dir: /home/whatap/app/chaos/trouble
+  scenario: "05_downstream_delay"
+  port: 8083
+  params: ["5"]
+  ssh_host: "ubuntu@43.203.137.253"
+
+browser:
+  base_url: "http://43.203.137.253:8080"
+  zoom_level: 1.0  # 100% zoom for 1080p - fills vertical space without gray bar
+  login:
+    url: /account/login
+    email: admin@whatap.io
+    password: admin
+    email_selector: '//*[@id="id_email"]'
+    password_selector: '//*[@id="id_password"]'
+  apm_dashboard:
+    url: /v2/project/apm/1/dashboard
+    wait_sec: 12  # Increased from 8 to show clear baseline
+  copilot:
+    url: /aiops/copilot/
+    new_chat_xpath: '//*[@id="root"]/div/div/div[1]/div[1]/button/span'
+    textarea_xpath: '//*[@id="root"]/div/div/div[2]/div[2]/form/textarea'
+    response_timeout: 120  # 2 minutes absolute maximum
+    minimum_wait_time: 60.0  # 1 minute - always wait this long before checking stability
+    stability_threshold: 10.0  # Seconds without content change to consider complete
+  query: "Recent response time has increased. Which service is causing the issue? Please analyze."
+  typing_delay_ms: 100
+  hitmap:
+    search_button_selector: "#root > div > div > div > div.SizeDragDomStyles__SubDomWrapper-jLokuK.cdlDAU > div > div > div > div.PageLayout__FullArea-kLsvap.clwYpL > div > div > div.PageLayout__FullArea-kLsvap.clwYpL > div > div > div > div.OptionbarPage-styles__OptionWrapper-ktIwdo.eFNjrZ > div:nth-child(3) > div.OptionbarPage-styles__ItemContent-iuQoJk.PEjsM > button"
+    selector_type: "css"  # css, xpath, or text
+    fallback_text: ["조회", "Search"]  # Fallback button text to try
+
+recording:
+  width: 1920
+  height: 1080  # YouTube standard 16:9 format (Full HD)
+  framerate: 30
+  crf: 18
+
+post_process:
+  output_width: 1920
+  output_height: 1080  # YouTube standard 16:9 format (Full HD)
+  fps: 30
+  crf: 22
+  # Fonts are auto-detected per OS. Override only if needed:
+  # font_bold: "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
+  # font_regular: "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+  intro:
+    text_primary: "AIOps Demo"
+    text_secondary: "LLM-Powered Performance Analysis"
+    background_color: "#1a1a2e"
+    duration_sec: 4
+  outro:
+    lines:
+      - "AIOps Demo"
+      - "WhaTap Monitoring + AI Copilot"
+      - "Powered by LLM"
+      - "whatap.io"
+    background_color: "#1a1a2e"
+    duration_sec: 4
+
+scenes:
+  - id: login
+    caption: "Step 1. Login to Monitoring System"
+  - id: normal_dashboard
+    caption: "Step 2. Normal State Dashboard (Stable Blue Metrics)"
+  - id: trouble_start
+    caption: "Step 3. Inject Chaos Scenario (Downstream Delay 5s)"
+  - id: trouble_dashboard
+    caption: "Step 4. Trouble Impact Detected (Red/Orange Spikes)"
+  - id: navigate_copilot
+    caption: "Step 5. Navigate to AI Copilot"
+  - id: new_chat
+    caption: "Step 6. Start New Chat"
+  - id: type_query
+    caption: "Step 7. Submit Natural Language Query"
+  - id: wait_response
+    caption: "Step 8. AI Analysis Streaming"
+    post_speed: 2.0
+  - id: show_result
+    caption: "Step 9. Review Analysis Results"
+  - id: response_analysis
+    caption: "Step 9a. AI Analysis Summary (Scroll View)"
+  - id: navigate_hitmap
+    caption: "Step 10. Hitmap Transaction Analysis (Validation)"
+  - id: hitmap_search
+    caption: "Step 11. Query Trouble Time Range"
+  - id: select_transactions
+    caption: "Step 12. Select High-Latency Transactions"
+  - id: show_transactions
+    caption: "Step 13. AI Analysis Validated"
+  - id: trouble_stop
+    caption: "Step 14. Recover from Chaos"
