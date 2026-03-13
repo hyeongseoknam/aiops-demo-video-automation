@@ -523,32 +523,38 @@ class BrowserAutomation:
         await asyncio.sleep(3)
 
     async def select_hitmap_transactions(self):
-        """Drag to select high-response-time area and show transactions.
+        """Drag to select slow transaction region in hitmap.
 
-        Uses heuristic approach: drag in the middle-right area of the hitmap
-        where high response times typically cluster (red/orange colors).
+        Targets the specific hitmap slow transaction display area using XPath.
+        This will display transactions of the selected region.
         """
         log.info("Selecting hitmap transaction area")
 
         try:
-            # Get hitmap container dimensions
-            hitmap_container = self.page.locator("canvas, svg, [class*='hitmap'], [class*='chart']").first
-            await hitmap_container.wait_for(state="visible", timeout=5000)
+            # Target the specific slow transaction region element
+            hitmap_selector = '//*[@id="APM_HITMAP"]/div[2]/div[1]'
+            hitmap_element = self.page.locator(f"xpath={hitmap_selector}")
 
-            box = await hitmap_container.bounding_box()
+            # Wait for element to be visible
+            await hitmap_element.wait_for(state="visible", timeout=5000)
+
+            box = await hitmap_element.bounding_box()
             if not box:
-                log.warning("Could not get hitmap bounding box")
+                log.warning("Could not get hitmap element bounding box")
                 await self.screenshot("hitmap_no_box")
                 return
 
-            # Calculate drag coordinates (middle-right area, upper portion)
-            # Assume high response times are in the upper-right quadrant
-            start_x = box["x"] + (box["width"] * 0.6)  # 60% from left
-            start_y = box["y"] + (box["height"] * 0.2)  # 20% from top
-            end_x = box["x"] + (box["width"] * 0.9)    # 90% from left
-            end_y = box["y"] + (box["height"] * 0.5)    # 50% from top
+            log.info("Hitmap element found: x=%.0f, y=%.0f, width=%.0f, height=%.0f",
+                     box["x"], box["y"], box["width"], box["height"])
 
-            log.info("Dragging hitmap area: (%.0f, %.0f) → (%.0f, %.0f)",
+            # Calculate drag coordinates within the element
+            # Drag from upper-left to lower-right to select slow transaction region
+            start_x = box["x"] + (box["width"] * 0.1)   # 10% from left
+            start_y = box["y"] + (box["height"] * 0.1)  # 10% from top
+            end_x = box["x"] + (box["width"] * 0.9)     # 90% from left
+            end_y = box["y"] + (box["height"] * 0.9)    # 90% from bottom
+
+            log.info("Dragging slow transaction region: (%.0f, %.0f) → (%.0f, %.0f)",
                      start_x, start_y, end_x, end_y)
 
             # Perform drag selection
@@ -559,7 +565,7 @@ class BrowserAutomation:
             await asyncio.sleep(0.5)
             await self.page.mouse.up()
 
-            log.info("Hitmap area selected")
+            log.info("Slow transaction region selected")
             await asyncio.sleep(2)  # Wait for transaction list to appear
 
         except Exception as e:
