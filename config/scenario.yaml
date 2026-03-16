@@ -11,7 +11,7 @@ trouble:
 
 browser:
   base_url: "http://43.203.137.253:8080"
-  zoom_level: 1.0  # 100% zoom for 1080p - fills vertical space without gray bar
+  zoom_level: 0.9  # 90% zoom for 1080p - shows bottom charts without cutting off
   login:
     url: /account/login
     email: admin@whatap.io
