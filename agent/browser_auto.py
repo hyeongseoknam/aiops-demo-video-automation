@@ -526,9 +526,9 @@ class BrowserAutomation:
         """Drag to select slow transaction region in hitmap.
 
         Targets the specific hitmap slow transaction display area using XPath.
-        This will display transactions of the selected region.
+        Drags to create a search filter for high-latency transactions during trouble period.
         """
-        log.info("Selecting hitmap transaction area")
+        log.info("Selecting hitmap transaction area (high-latency region)")
 
         try:
             # Target the specific slow transaction region element
@@ -547,26 +547,44 @@ class BrowserAutomation:
             log.info("Hitmap element found: x=%.0f, y=%.0f, width=%.0f, height=%.0f",
                      box["x"], box["y"], box["width"], box["height"])
 
-            # Calculate drag coordinates within the element
-            # Drag from upper-left to lower-right to select slow transaction region
-            start_x = box["x"] + (box["width"] * 0.1)   # 10% from left
-            start_y = box["y"] + (box["height"] * 0.1)  # 10% from top
-            end_x = box["x"] + (box["width"] * 0.9)     # 90% from left
-            end_y = box["y"] + (box["height"] * 0.9)    # 90% from bottom
+            # Calculate drag coordinates to select HIGH-LATENCY region during TROUBLE TIME
+            # Y-axis: 40%-60% from top = 4-6 second latency range (where colored dots appear)
+            # X-axis: Middle portion = trouble time window (not full width)
+            start_x = box["x"] + (box["width"] * 0.3)   # 30% from left (middle time range)
+            start_y = box["y"] + (box["height"] * 0.4)  # 40% from top (~6 seconds)
+            end_x = box["x"] + (box["width"] * 0.7)     # 70% from left (middle time range)
+            end_y = box["y"] + (box["height"] * 0.6)    # 60% from top (~4 seconds)
 
-            log.info("Dragging slow transaction region: (%.0f, %.0f) → (%.0f, %.0f)",
+            log.info("Dragging high-latency region (colored dots): (%.0f, %.0f) → (%.0f, %.0f)",
                      start_x, start_y, end_x, end_y)
 
-            # Perform drag selection
+            # Perform drag selection to create search filter
             await self.page.mouse.move(start_x, start_y)
             await self.page.mouse.down()
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.3)
             await self.page.mouse.move(end_x, end_y)
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.3)
             await self.page.mouse.up()
 
-            log.info("Slow transaction region selected")
-            await asyncio.sleep(2)  # Wait for transaction list to appear
+            log.info("Selection drag completed - waiting for search to execute")
+            await asyncio.sleep(1)  # Brief wait for drag to register
+
+            # Wait for search results to populate (look for transaction count indicator)
+            try:
+                # Wait for transaction list to have data (not "No data")
+                await self.page.wait_for_function(
+                    """() => {
+                        const noDataElements = document.querySelectorAll('[class*="no-data"], [class*="NoData"]');
+                        return noDataElements.length === 0 ||
+                               Array.from(noDataElements).every(el => el.offsetParent === null);
+                    }""",
+                    timeout=10000
+                )
+                log.info("Search results populated successfully")
+            except Exception as e:
+                log.warning("Could not confirm search results populated: %s", e)
+
+            await asyncio.sleep(2)  # Additional wait for stability
 
         except Exception as e:
             log.error("Failed to select hitmap transactions: %s", e)
