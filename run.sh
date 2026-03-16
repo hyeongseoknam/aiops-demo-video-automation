@@ -5,5 +5,4 @@
 
 source .venv/bin/activate && python test_all_scenarios.py \
     --config config/scenario.yaml \
-    --output output/batch_all \
-    --verbose
+    --output output/batch_all 

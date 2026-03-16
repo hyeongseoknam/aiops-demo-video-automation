@@ -2,7 +2,7 @@
 
 > Automated demonstration video creation for AIOps monitoring systems with AI Copilot integration
 
-**Status:** ✅ Fully Functional | **Last Run:** 2026-03-13 | **Output:** 51.1s demo video (all 9 scenes!)
+**Status:** ✅ Fully Functional | **Last Run:** 2026-03-16 | **Output:** 128.9s demo video (all 14 scenes!)
 
 ---
 
@@ -10,12 +10,17 @@
 
 Creates professional demonstration videos showing:
 1. Login to monitoring system
-2. APM dashboard with performance metrics
-3. AI Copilot interaction
-4. Natural language query processing
-5. AI-generated performance analysis
+2. Baseline dashboard (normal state)
+3. Chaos injection (downstream delay)
+4. Performance impact visualization
+5. AI Copilot navigation
+6. Natural language query submission
+7. AI-generated performance analysis (streaming)
+8. Response summary overlay with key points
+9. Hitmap transaction validation
+10. Trouble recovery
 
-**Output:** Production-ready MP4 videos with captions, transitions, and branding
+**Output:** YouTube-ready Full HD (1920x1080) MP4 videos with English captions and branding
 
 ---
 
@@ -38,7 +43,7 @@ python run.py --dry-run
 python run.py
 ```
 
-**Output:** `output/aiops_demo_final.mp4` (~51 seconds, 1.0 MB)
+**Output:** `output/aiops_demo_05_downstream_delay.mp4` (~129 seconds, 3.0 MB)
 
 ---
 
@@ -109,9 +114,10 @@ python run.py --skip-postprocess
 ## 📦 Requirements
 
 - **Python:** 3.12+ (uses `str | None` syntax)
-- **ffmpeg:** 8.0+ (video processing)
-- **CJK Fonts:** For Korean text rendering
+- **ffmpeg:** 8.0+ (video processing with xfade, overlay)
+- **System Fonts:** Auto-detected per OS (AppleSDGothicNeo on macOS, NotoSansCJK on Linux)
 - **Playwright:** Chromium browser (~200 MB download)
+- **Pillow:** For overlay image generation
 
 **macOS Install:**
 ```bash
@@ -133,13 +139,16 @@ sudo apt install python3 python3-venv ffmpeg fonts-noto-cjk
 |---------|--------|
 | Browser Automation | ✅ Working |
 | Video Recording | ✅ Working |
-| Scene Orchestration | ✅ Working |
-| Video Concatenation | ✅ Working |
-| SSH Trouble Injection | ✅ Working (configured!) |
-| Caption Rendering | 🔴 Broken (font escaping issue) |
-| Intro/Outro | 🔴 Broken (same font issue) |
+| Scene Orchestration | ✅ Working (14 scenes) |
+| Video Post-processing | ✅ Working |
+| SSH Trouble Injection | ✅ Working |
+| Response Analysis | ✅ Working (AI summary overlay) |
+| Hitmap Validation | ✅ Working (XPath-based selection) |
+| Caption Rendering | ✅ Working (FFmpeg overlays) |
+| English Language | ✅ Working |
+| YouTube Format | ✅ Working (1080p 16:9) |
 
-**Latest Output:** 1.0 MB MP4, 51.1 seconds (ALL 9 SCENES), 1920x1080 @ 30fps
+**Latest Output:** 3.0 MB MP4, 128.9 seconds (ALL 14 SCENES), 1920x1080 @ 30fps
 
 **Known Issues:** See [PROJECT.md - Known Issues](PROJECT.md#-known-issues)
 
@@ -159,8 +168,8 @@ orchestrator.py (Coordinator)
 
 **Recording Strategy:** Playwright's built-in `record_video` (no display server needed)
 
-**Scenes:**
-1. Trouble Start → 2. Login → 3. Dashboard → 4. Copilot → 5. Query → 6. Response → 7. Result → 8. Trouble Stop
+**Scenes (14 total):**
+1. Login → 2. Normal Dashboard → 3. Trouble Start → 4. Trouble Dashboard → 5. Navigate Copilot → 6. New Chat → 7. Type Query → 8. Wait Response → 9. Show Result → 10. Navigate Hitmap → 11. Hitmap Search → 12. Select Transactions → 13. Show Transactions → 14. Trouble Stop
 
 ---
 
@@ -186,10 +195,6 @@ brew install python@3.12
 rm -rf .venv
 ./setup.sh
 ```
-
-### "Caption rendering failed"
-This is a known issue (font path escaping). Video still generates, just without captions.
-**Fix:** See [DEVELOPMENT.md - FFmpeg Caption Rendering](DEVELOPMENT.md#issue-ffmpeg-caption-rendering-failed)
 
 ### More Issues?
 → See **[DEVELOPMENT.md - Troubleshooting](DEVELOPMENT.md#-troubleshooting)**
@@ -231,20 +236,25 @@ demo_movie/
 ## 🎥 Sample Output
 
 **Generated Video:**
-- **Duration:** 40-50 seconds
-- **Resolution:** 1920x1080
+- **Duration:** ~129 seconds (2.1 minutes)
+- **Resolution:** 1920x1080 (YouTube Full HD 16:9)
 - **Frame Rate:** 30 fps
 - **Format:** H.264 MP4
-- **Size:** ~1 MB per minute
+- **Size:** ~3.0 MB
+- **Language:** English
 
 **Scenes Include:**
-- Animated terminal (trouble injection)
-- Login sequence
-- Dashboard navigation
-- AI Copilot interaction
-- Natural language query
-- Streaming AI response
-- Results display
+- System login and authentication
+- Baseline performance dashboard
+- Chaos injection (synthetic terminal)
+- Performance impact visualization
+- AI Copilot navigation
+- Natural language query submission
+- Streaming AI response with real-time updates
+- AI analysis summary overlay (5 key points)
+- Hitmap transaction validation
+- Slow transaction selection (XPath-based)
+- Trouble recovery
 
 ---
 
@@ -262,13 +272,16 @@ When making changes:
 ## 📝 TODOs
 
 **High Priority:**
-- [ ] Fix caption rendering (font path escaping)
-- [ ] Document SSH configuration method
-- [ ] Test multiple trouble scenarios
+- [x] YouTube 1080p format (16:9)
+- [x] English language support
+- [x] Response analysis with AI summary overlay
+- [x] Hitmap validation with XPath selection
+- [x] Video encoding race condition fix
 
 **Medium Priority:**
-- [ ] Support multiple scenarios in one run
-- [ ] Add configuration validation
+- [ ] Support multiple scenarios in one batch run
+- [ ] Add CLI flag for stabilization time
+- [ ] Configuration validation
 - [ ] Improve error messages
 
 **Low Priority:**
@@ -290,6 +303,6 @@ When making changes:
 
 ---
 
-**Last Updated:** 2026-03-13
-**Version:** 1.0
-**Status:** ✅ Fully Functional (complete pipeline with chaos injection!)
+**Last Updated:** 2026-03-16
+**Version:** 2.0
+**Status:** ✅ Production Ready (YouTube 1080p, English, AI Summary, Hitmap Validation)
